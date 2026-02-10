@@ -1,0 +1,7 @@
+# Ignorar Ambientes Virtuais (os dois que tens aí)
+venv/
+.venv/
+
+# Ignorar Banco de Dados e Cache
+*.db
+__pycache__/
