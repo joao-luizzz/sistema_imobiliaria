@@ -15,11 +15,14 @@ def analisar_credito(parcela, renda):
     comprometimento = (parcela / renda) * 100 if renda > 0 else 0
     
     if comprometimento < 30:
-        return "green", "APROVADO", "Comprometimento saudável (abaixo de 30%).", comprometimento
+        # Verde Esmeralda (menos neon)
+        return "#059669", "APROVADO", "Comprometimento saudável.", comprometimento
     elif 30 <= comprometimento <= 40:
-        return "orange", "ATENÇÃO", "Comprometimento entre 30% e 40%. Considere aumentar a entrada.", comprometimento
+        # Amarelo Ouro
+        return "#d97706", "ATENÇÃO", "Considere aumentar a entrada.", comprometimento
     else:
-        return "red", "REPROVADO", "Risco alto! Comprometimento acima de 40%.", comprometimento
+        # Vermelho Rosado (Rose 600) - Muito mais elegante que o vermelho puro
+        return "#e11d48", "REPROVADO", "Risco alto (>40%).", comprometimento
 
 def projetar_amortizacao(saldo_inicial, meses, taxa_mensal, sistema="SAC"):
     """
