@@ -1,0 +1,64 @@
+/* --- ESTILO MODERNO (Tailwind-like) --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: #f8fafc; /* Slate-50 */
+    border-right: 1px solid #e2e8f0;
+}
+
+/* Cards de Métricas */
+div[data-testid="stMetric"] {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem; /* rounded-xl */
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+div[data-testid="stMetric"]:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Inputs */
+.stTextInput > div > div > input, .stNumberInput > div > div > input {
+    border-radius: 0.5rem;
+    border: 1px solid #cbd5e1;
+}
+
+.stTextInput > div > div > input:focus, .stNumberInput > div > div > input:focus {
+    border-color: #3b82f6; /* Blue-500 */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Botões */
+.stButton > button {
+    border-radius: 0.5rem;
+    font-weight: 600;
+    border: none;
+    padding: 0.5rem 1rem;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] { gap: 24px; }
+.stTabs [data-baseweb="tab"] {
+    height: 50px;
+    border-radius: 4px;
+    color: #64748b;
+    font-weight: 600;
+}
+.stTabs [aria-selected="true"] {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
+}
+
+/* Tipografia */
+h1 { color: #0f172a; letter-spacing: -0.025em; }
+h2, h3 { color: #334155; }
+.block-container { padding-top: 2rem; }
