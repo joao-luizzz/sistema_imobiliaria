@@ -1,99 +1,67 @@
-/* --- ESTILO BASE (Modo Claro / Padrão) --- */
+/* Importando fonte Inter (Padrão moderno) */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-/* Sidebar (Claro) */
-[data-testid="stSidebar"] {
-    background-color: #f8fafc; /* Slate-50 */
-    border-right: 1px solid #e2e8f0;
-}
-
-/* Cards de Métricas (Claro) */
+/* --- CARDS DE MÉTRICAS (Efeito Glass/Moderno) --- */
 div[data-testid="stMetric"] {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    background-color: #1e293b; /* Slate 800 */
+    border: 1px solid #334155; /* Borda sutil */
+    border-radius: 12px;
+    padding: 15px;
+    /* Sombra suave para destacar do fundo */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); 
+    transition: transform 0.2s ease;
 }
 
 div[data-testid="stMetric"]:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6; /* Brilha azul ao passar o mouse */
     transform: translateY(-2px);
 }
 
-/* Inputs e Botões (Geral) */
-.stTextInput > div > div > input, .stNumberInput > div > div > input {
-    border-radius: 0.5rem;
-    border: 1px solid #cbd5e1;
+/* --- INPUTS (Limpeza visual) --- */
+/* Removemos o fundo branco forçado e deixamos o config.toml agir, 
+   apenas arredondamos as bordas */
+.stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {
+    border-radius: 8px !important;
 }
 
-.stTextInput > div > div > input:focus, .stNumberInput > div > div > input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+/* Foco nos inputs (Glow Azul) */
+.stTextInput input:focus, .stNumberInput input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
 }
 
-.stButton > button {
-    border-radius: 0.5rem;
-    font-weight: 600;
-    border: none;
-    padding: 0.5rem 1rem;
+/* --- BOTÕES --- */
+.stButton button {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s !important;
 }
 
-/* Tipografia Base */
-h1 { color: #0f172a; letter-spacing: -0.025em; }
-h2, h3 { color: #334155; }
-.block-container { padding-top: 2rem; }
+/* --- TABS --- */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 10px;
+    background-color: transparent;
+}
 
-/* --------------------------------------------------------- */
-/* 🌑 MODO ESCURO (Dark Mode Override)                       */
-/* --------------------------------------------------------- */
-@media (prefers-color-scheme: dark) {
-    
-    /* Fundo Geral e Texto */
-    .stApp {
-        background-color: #0f172a; /* Slate-900 */
-        color: #f1f5f9; /* Slate-100 */
-    }
+.stTabs [data-baseweb="tab"] {
+    border-radius: 8px;
+    padding: 10px 20px;
+    background-color: transparent;
+    border: 1px solid transparent;
+}
 
-    /* Sidebar Escura */
-    [data-testid="stSidebar"] {
-        background-color: #1e293b; /* Slate-800 */
-        border-right: 1px solid #334155; /* Slate-700 */
-    }
+.stTabs [aria-selected="true"] {
+    background-color: #1e293b !important;
+    border: 1px solid #3b82f6 !important;
+    color: #3b82f6 !important;
+}
 
-    /* Cards Escuros */
-    div[data-testid="stMetric"] {
-        background-color: #1e293b; /* Slate-800 */
-        border: 1px solid #334155; /* Slate-700 */
-    }
-    
-    div[data-testid="stMetric"] > div {
-        color: #f8fafc !important; /* Texto branco no card */
-    }
-    
-    div[data-testid="stMetric"] label {
-        color: #94a3b8 !important; /* Label cinza claro */
-    }
-
-    /* Inputs Escuros */
-    .stTextInput > div > div > input, .stNumberInput > div > div > input {
-        background-color: #334155; /* Slate-700 */
-        color: white;
-        border-color: #475569;
-    }
-
-    /* Textos (Forçar branco/cinza claro) */
-    h1, h2, h3, p, li {
-        color: #f1f5f9 !important;
-    }
-    
-    /* Ajuste na sombra para não ficar estranha no escuro */
-    div[data-testid="stMetric"] {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-    }
+/* --- CORREÇÃO DA MENSAGEM DE STATUS (Para não ficar aquele vermelho neon) --- */
+/* Isso vai suavizar os alertas */
+div[data-testid="stMarkdownContainer"] p {
+    font-size: 1rem;
 }
