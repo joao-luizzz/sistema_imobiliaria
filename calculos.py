@@ -1,26 +1,64 @@
 import pandas as pd
 
 def calcular_saldo_devedor(valor_imovel, entrada, chaves, qtd_intercaladas, valor_intercalada):
+    """Calcula o saldo devedor subtraindo todas as entradas."""
     total_intercaladas = qtd_intercaladas * valor_intercalada
     total_deducoes = entrada + chaves + total_intercaladas
     saldo_devedor = valor_imovel - total_deducoes
     return saldo_devedor, total_intercaladas
 
-def calcular_parcela(saldo_devedor, meses):
-    if saldo_devedor <= 0: return 0.0
-    return saldo_devedor / meses if meses > 0 else 0.0
-
 def analisar_credito(parcela, renda):
+    """
+    O 'Sinal de Trânsito' financeiro.
+    Retorna: Cor, Status, Mensagem e % de Comprometimento.
+    """
     comprometimento = (parcela / renda) * 100 if renda > 0 else 0
+    
     if comprometimento < 30:
-        return "green", "APROVADO", "Comprometimento saudável (<30%).", comprometimento
+        return "green", "APROVADO", "Comprometimento saudável (abaixo de 30%).", comprometimento
     elif 30 <= comprometimento <= 40:
-        return "orange", "ATENÇÃO", "Entre 30% e 40%.", comprometimento
+        return "orange", "ATENÇÃO", "Comprometimento entre 30% e 40%. Considere aumentar a entrada.", comprometimento
     else:
-        return "red", "REPROVADO", "Risco alto (>40%).", comprometimento
+        return "red", "REPROVADO", "Risco alto! Comprometimento acima de 40%.", comprometimento
 
-def projetar_evolucao(saldo, parcela, meses, taxa):
+def projetar_amortizacao(saldo_inicial, meses, taxa_mensal, sistema="SAC"):
+    """
+    Gera a tabela de amortização profissional (SAC ou PRICE).
+    """
     dados = []
-    for i in range(1, meses + 1):
-        dados.append({"Mês": i, "Valor Parcela": parcela * ((1 + taxa) ** i)})
+    saldo_devedor = saldo_inicial
+    i = taxa_mensal
+    n = meses
+
+    # Definição da Parcela ou Amortização inicial
+    if sistema == "PRICE":
+        # Fórmula Price: PMT = PV * [i(1+i)^n] / [(1+i)^n - 1]
+        if i > 0:
+            parcela_fixa = saldo_inicial * (i * (1 + i)**n) / ((1 + i)**n - 1)
+        else:
+            parcela_fixa = saldo_inicial / n
+    else: # SAC
+        amortizacao_fixa = saldo_inicial / n
+
+    for mes in range(1, n + 1):
+        juros = saldo_devedor * i
+        
+        if sistema == "PRICE":
+            amortizacao = parcela_fixa - juros
+            parcela = parcela_fixa
+        else: # SAC
+            amortizacao = amortizacao_fixa
+            parcela = amortizacao + juros
+        
+        saldo_devedor -= amortizacao
+        if saldo_devedor < 0: saldo_devedor = 0
+
+        dados.append({
+            "Mês": mes,
+            "Parcela": parcela,
+            "Amortização": amortizacao,
+            "Juros": juros,
+            "Saldo Devedor": saldo_devedor
+        })
+
     return pd.DataFrame(dados)
