@@ -1,7 +1,17 @@
-# Ignorar Ambientes Virtuais (os dois que tens aí)
+# Arquivos de ambiente e senhas (CRÍTICO!)
+.env
+.streamlit/secrets.toml
+secrets.toml
+
+# Pastas de lixo do Python
+__pycache__/
+*.pyc
+
+# Ambiente Virtual (se estiver na pasta do projeto)
 venv/
 .venv/
+env/
 
-# Ignorar Banco de Dados e Cache
+# Banco de dados local (se ainda tiver sobras)
 *.db
-__pycache__/
+*.sqlite3
