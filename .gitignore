@@ -15,3 +15,6 @@ env/
 # Banco de dados local (se ainda tiver sobras)
 *.db
 *.sqlite3
+
+# Relatórios gerados
+*.pdf
