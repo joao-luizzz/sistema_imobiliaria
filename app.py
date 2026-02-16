@@ -19,20 +19,33 @@ def tela_login():
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("<h2 style='text-align: center;'>🔐 Acesso Restrito</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: gray;'>Sistema Imobiliário Premium</p>", unsafe_allow_html=True)
+        
         with st.form("login_form"):
-            user = st.text_input("Utilizador").strip()
-            pw = st.text_input("Senha", type="password").strip()
-            botao = st.form_submit_button("Entrar", width="stretch")
+            user = st.text_input("Utilizador", placeholder="Seu usuário").strip()
+            pw = st.text_input("Senha", type="password", placeholder="Sua senha").strip()
+            
+            # Botão agora ocupa a largura total e é primário
+            botao = st.form_submit_button("Entrar", type="primary", use_container_width=True)
             
             if botao:
-                nome = database.login_usuario(user, pw)
-                if nome:
-                    st.session_state['autenticado'] = True
-                    st.session_state['nome_usuario'] = nome
-                    st.session_state['username_logado'] = user
-                    st.rerun()
+                if not user or not pw:
+                    st.warning("Preencha todos os campos.")
                 else:
-                    st.error("Utilizador ou senha incorretos")
+                    # Feedback visual de carregamento
+                    with st.spinner("Autenticando..."):
+                        nome = database.login_usuario(user, pw)
+                        
+                    if nome:
+                        st.session_state['autenticado'] = True
+                        st.session_state['nome_usuario'] = nome
+                        st.session_state['username_logado'] = user
+                        st.toast(f"Bem-vindo, {nome}!", icon="👋")
+                        import time
+                        time.sleep(0.5) # Pequena pausa para ver o Toast
+                        st.rerun()
+                    else:
+                        st.error("Utilizador ou senha incorretos")
 
 # --- 3. LÓGICA PRINCIPAL ---
 if not st.session_state['autenticado']:

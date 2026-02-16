@@ -1,67 +1,72 @@
-/* Importando fonte Inter (Padrão moderno) */
+/* Importando fonte moderna */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
-/* --- CARDS DE MÉTRICAS (Efeito Glass/Moderno) --- */
-div[data-testid="stMetric"] {
-    background-color: #1e293b; /* Slate 800 */
-    border: 1px solid #334155; /* Borda sutil */
-    border-radius: 12px;
-    padding: 15px;
-    /* Sombra suave para destacar do fundo */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3); 
+/* Esconde menu padrão e rodapé do Streamlit */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Cards KPI com efeito Glassmorphism */
+.kpi-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
     transition: transform 0.2s ease;
 }
 
-div[data-testid="stMetric"]:hover {
-    border-color: #3b82f6; /* Brilha azul ao passar o mouse */
+.kpi-card:hover {
     transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, 0.5);
 }
 
-/* --- INPUTS (Limpeza visual) --- */
-/* Removemos o fundo branco forçado e deixamos o config.toml agir, 
-   apenas arredondamos as bordas */
-.stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {
-    border-radius: 8px !important;
+/* Tabela Minimalista */
+.table-container {
+    background: #1e293b;
+    border-radius: 12px;
+    padding: 10px;
+    overflow: hidden;
 }
 
-/* Foco nos inputs (Glow Azul) */
-.stTextInput input:focus, .stNumberInput input:focus {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+.minimal-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #cbd5e1;
+    font-size: 0.9rem;
 }
 
-/* --- BOTÕES --- */
-.stButton button {
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-    transition: all 0.2s !important;
+.minimal-table th {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 2px solid #334155;
+    color: #3b82f6;
+    font-weight: 600;
 }
 
-/* --- TABS --- */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 10px;
-    background-color: transparent;
+.minimal-table td {
+    padding: 10px;
+    border-bottom: 1px solid #334155;
 }
 
-.stTabs [data-baseweb="tab"] {
+.minimal-table tr:hover {
+    background-color: #334155;
+}
+
+/* Ajustes nos Inputs */
+.stTextInput > div > div > input, .stNumberInput > div > div > input {
+    background-color: #1e293b;
+    color: white;
     border-radius: 8px;
-    padding: 10px 20px;
-    background-color: transparent;
-    border: 1px solid transparent;
+    border: 1px solid #334155;
 }
 
-.stTabs [aria-selected="true"] {
-    background-color: #1e293b !important;
-    border: 1px solid #3b82f6 !important;
-    color: #3b82f6 !important;
-}
-
-/* --- CORREÇÃO DA MENSAGEM DE STATUS (Para não ficar aquele vermelho neon) --- */
-/* Isso vai suavizar os alertas */
-div[data-testid="stMarkdownContainer"] p {
-    font-size: 1rem;
+.stSelectbox > div > div > div {
+    background-color: #1e293b;
+    color: white;
 }

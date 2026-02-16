@@ -92,3 +92,47 @@ def calcular_poder_compra(parcela_maxima, meses, taxa_mensal, sistema="SAC", tar
             valor_financiado = parcela_liquida * meses
 
     return valor_financiado
+
+# --- ADICIONE NO FINAL DE core/calculos.py ---
+
+def calcular_antecipacao(saldo_inicial, taxa_mensal, sistema, parcela_atual, valor_extra, periodicidade="Mensal"):
+    """
+    Simula o impacto de pagar um valor extra recorrente.
+    Retorna: Novo Prazo (meses), Juros Totais Pagos, Economia Gerada
+    """
+    saldo = saldo_inicial
+    meses_percorridos = 0
+    total_juros_com_extra = 0
+    
+    # Loop de simulação mês a mês
+    while saldo > 0 and meses_percorridos < 420: # Limite de segurança
+        meses_percorridos += 1
+        
+        # 1. Calcula Juros do mês
+        juros = saldo * taxa_mensal
+        total_juros_com_extra += juros
+        
+        # 2. Define amortização normal
+        if sistema == "SAC":
+            amortizacao = parcela_atual - juros # Simplificação baseada na parcela média/inicial
+            # Nota: No SAC a parcela cai, mas para antecipação vamos assumir o esforço financeiro constante
+        else: # PRICE
+            amortizacao = parcela_atual - juros
+            
+        # 3. Aplica o Extra
+        amortizacao_extra = 0
+        if periodicidade == "Mensal":
+            amortizacao_extra = valor_extra
+        elif periodicidade == "Anual" and meses_percorridos % 12 == 0:
+            amortizacao_extra = valor_extra
+        elif periodicidade == "Única (Agora)" and meses_percorridos == 1:
+            amortizacao_extra = valor_extra
+
+        # 4. Abate do saldo
+        saldo -= (amortizacao + amortizacao_extra)
+        
+        # Se pagou tudo, para
+        if saldo < 0:
+            saldo = 0
+            
+    return meses_percorridos, total_juros_com_extra

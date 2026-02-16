@@ -1,12 +1,13 @@
 from fpdf import FPDF
 from datetime import datetime
 import os
+import io               
+import pandas as pd    
 
 class PDF(FPDF):
     def header(self):
         # Tenta carregar a logo se existir na pasta assets
         if os.path.exists("assets/logo.png"):
-            # Ajuste as coordenadas x, y, w conforme sua logo
             self.image("assets/logo.png", 10, 8, 33)
             self.set_font('Arial', 'B', 14)
             self.cell(40) 
@@ -20,11 +21,10 @@ class PDF(FPDF):
     def footer(self):
         self.set_y(-15)
         self.set_font('Arial', 'I', 8)
-        # CORREÇÃO AQUI: Trocamos o "•" por "|"
         self.cell(0, 10, f'Sistema Imobiliario Premium | Pagina {self.page_no()}', 0, 0, 'C')
 
 def tratar_texto(texto):
-    """Remove caracteres incompatíveis com Latin-1 (emojis, simbolos estranhos)"""
+    """Remove caracteres incompatíveis com Latin-1"""
     if isinstance(texto, str):
         return texto.encode('latin-1', 'replace').decode('latin-1')
     return str(texto)
@@ -40,7 +40,6 @@ def gerar_proposta_pdf(dados):
     pdf.set_font("Arial", size=12)
     pdf.set_fill_color(240, 240, 240)
     
-    # Tratamos o nome do cliente para garantir que acentos não quebrem
     nome_cliente = tratar_texto(dados['cliente'])
     
     pdf.cell(0, 10, txt=f"  Cliente: {nome_cliente}", ln=True, fill=True)
@@ -91,10 +90,33 @@ def gerar_proposta_pdf(dados):
     texto_parecer = tratar_texto(dados['status_texto'])
     pdf.multi_cell(0, 5, txt=f"Parecer do Sistema:\n{texto_parecer}")
     
-    # Remove espaços do nome do arquivo para evitar erros no download
     safe_filename = f"proposta_{dados['cliente'].replace(' ', '_')}.pdf"
-    # Remove acentos do nome do arquivo também, se possível, ou apenas caracteres ruins
     safe_filename = safe_filename.encode('ascii', 'ignore').decode('ascii')
     
     pdf.output(safe_filename)
     return safe_filename
+
+def gerar_excel_comparativo(df_sac, df_price, dados_cliente):
+    """
+    Gera um arquivo Excel com duas abas (SAC e PRICE) na memória RAM.
+    Não salva no disco, retorna o objeto pronto para download.
+    """
+    output = io.BytesIO()
+    
+    # Cria o "Escritor" de Excel usando a engine openpyxl
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        # Aba 1: Resumo
+        resumo = pd.DataFrame({
+            'Cliente': [dados_cliente['cliente']],
+            'Valor Imóvel': [dados_cliente['valor_imovel']],
+            'Entrada': [dados_cliente['entrada']],
+            'Prazo (meses)': [dados_cliente['meses']]
+        })
+        resumo.to_excel(writer, sheet_name='Resumo', index=False)
+        
+        # Aba 2 e 3: Tabelas completas
+        df_sac.to_excel(writer, sheet_name='Tabela SAC', index=False)
+        df_price.to_excel(writer, sheet_name='Tabela PRICE', index=False)
+        
+    output.seek(0)
+    return output

@@ -1,27 +1,67 @@
-# 🚀 Roadmap do Sistema Imobiliário
+🧠 Fase 1: Inteligência Financeira (O "Wow" Factor)
 
-## ✅ Fase 1: Realismo Financeiro (Feito)
-- [x] Adicionar input de 'Taxa Adm/Seguro' no app.py
-- [x] Atualizar função projetar_amortizacao em calculos.py para incluir tarifa
+Dê ao cliente respostas para perguntas difíceis.
 
-## ✅ Fase 2: O Oráculo (Feito)
-- [x] Criar função calcular_poder_compra em calculos.py
-- [x] Implementar seletor de 'Modo de Operação' no app.py
-- [x] Criar layout e cards específicos para o modo Oráculo
+    [ ] Simulador de Amortização Extra ("E se eu der um lance?")
 
-## ✅ Fase 3: Visual Premium (Feito)
-- [x] Atualizar CSS com classes .kpi-card e .oracle-card
-- [x] Substituir st.metric por cards HTML personalizados
+        O que é: Permitir que o usuário diga: "E se eu der R$ 5.000 a mais todo ano?".
 
-## 🚧 Fase 4: Persistência de Dados (Próximo Passo)
-- [ ] Escolher banco de dados: Supabase (PostgreSQL)
-- [ ] Criar conta no Supabase e pegar credenciais (URL)
-- [ ] Configurar .streamlit/secrets.toml com as senhas
-- [ ] Criar tabela 'simulacoes' no banco
-- [ ] Atualizar database.py para salvar na nuvem em vez de SQLite
+        Impacto: Mostra como o prazo cai de 30 anos para 15 anos. Venda garantida.
 
-## 🚀 Geral / Deploy
-- [ ] Atualizar requirements.txt (adicionar plotly, psycopg2-binary, etc.)
-- [ ] Testar aplicação completa localmente
-- [ ] Fazer commit e push final
-- [ ] Verificar deploy no Streamlit Cloud
+        Técnica: Alterar o loop em core/calculos.py para abater do saldo devedor periodicamente.
+
+    [ ] Comparador Lado a Lado (Batalha de Cenários)
+
+        O que é: Um botão "Comparar" que coloca SAC e PRICE lado a lado na tela.
+
+        Impacto: O cliente entende visualmente a diferença da parcela inicial vs. total de juros.
+
+        Técnica: Criar uma view nova que chama a função de cálculo duas vezes e exibe em st.columns(2).
+
+    [ ] Cálculo do C.E.T. (Custo Efetivo Total)
+
+        O que é: Além dos juros, somar taxas e seguros para mostrar a taxa real anual.
+
+        Impacto: Transparência e compliance bancário.
+
+📱 Fase 2: Viralização e Comunicação
+
+Facilite a vida do corretor para compartilhar os dados.
+
+    [ ] Botão "Enviar no WhatsApp"
+
+        O que é: Um botão que abre o WhatsApp Web já com um texto pronto: "Olá [Cliente], segue o resumo: Imóvel de R$ X, Parcela de R$ Y. Vamos agendar visita?"
+
+        Técnica: Usar st.link_button com URL formatada (https://wa.me/?text=...).
+
+    [ ] Exportar para Excel (Planilha Detalhada)
+
+        O que é: Além do PDF (que é estático), permitir baixar o .xlsx da evolução da dívida.
+
+        Impacto: Para clientes analíticos (engenheiros, contadores) que gostam de conferir conta.
+
+🎨 Fase 3: UX Refinada (Experiência de Uso)
+
+Deixar o uso mais fluido e evitar erros.
+
+    [ ] Máscaras de Input (R$ Dinâmico)
+
+        O que é: O usuário digita 350000 e o campo formata sozinho para R$ 350.000,00.
+
+        Impacto: Evita erros de "um zero a mais ou a menos".
+
+        Obs: O Streamlit nativo não faz isso bem, mas podemos usar formatação visual ou bibliotecas extras.
+
+    [ ] Dashboard Interativo com Filtros de Data
+
+        O que é: No Analytics, permitir escolher: "Últimos 7 dias", "Este Mês", "Este Ano".
+
+        Técnica: Adicionar um st.date_input no views/dashboard.py que filtra o DataFrame.
+
+🤖 Fase 4: O Futuro (IA Integration)
+
+    [ ] Assistente de Análise de Crédito (IA Simples)
+
+        O que é: Um texto gerado automaticamente: "Com base na renda de R$ 15k, este cliente tem perfil 'Ouro'. Sugira imóveis de até R$ 800k."
+
+        Técnica: Regras condicionais avançadas (If/Else) ou conectar na API do Gemini para gerar o texto.

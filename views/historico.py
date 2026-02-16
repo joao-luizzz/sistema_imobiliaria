@@ -1,69 +1,98 @@
 import streamlit as st
-from core import database
 import pandas as pd
+from core import database
+from components import ui
+import io
 
 def render():
-    st.title("📂 Histórico de Atendimentos")
-    st.caption("Visualize e gerencie as simulações realizadas no sistema.")
+    st.title("📂 Histórico de Simulações")
+    
+    # 1. Identifica Utilizador e Carrega Dados
+    usuario = st.session_state.get('username_logado', 'admin')
+    
+    # Adicionamos um botão de atualização manual
+    if st.button("🔄 Atualizar Lista", type="secondary"):
+        st.cache_data.clear()
+        
+    df = database.carregar_historico(usuario)
+
+    if df.empty:
+        st.info("Nenhuma simulação registada ainda.")
+        return
+
+    # 2. Barra de Ferramentas (Filtros e Ações)
+    c1, c2 = st.columns([2, 1])
+    
+    with c1:
+        # 🔍 Filtro de Busca
+        termo_busca = st.text_input("🔍 Buscar Cliente", placeholder="Digite o nome...").lower()
+    
+    with c2:
+        # 📥 Botão de Exportar Tudo (Excel)
+        st.write("") # Espaçamento para alinhar
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name="Historico Completo")
+            
+        st.download_button(
+            label="📥 Baixar Tudo (.xlsx)",
+            data=buffer,
+            file_name="historico_geral.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True # width="stretch" se tiver atualizado a library
+        )
+
+    # 3. Aplica o Filtro
+    if termo_busca:
+        df = df[df['cliente'].str.lower().str.contains(termo_busca)]
+
+    # 4. Formatação da Tabela
     st.markdown("---")
     
-    # 1. Obtém o usuário logado
-    autor_atual = st.session_state.get('username_logado', 'admin')
+    # Vamos criar uma coluna 'Excluir' checkbox para permitir seleção em massa (visual)
+    # Mas para simplificar e ser robusto, vamos fazer exclusão por ID na sidebar ou botão
     
-    # 2. Busca os dados (A lógica de quem vê o quê está no core/database.py)
-    df_hist = database.carregar_historico(autor_atual)
+    # Exibição Profissional
+    st.dataframe(
+        df,
+        column_config={
+            "id": st.column_config.NumberColumn("ID", format="%d", width="small"),
+            "data_criacao": st.column_config.DatetimeColumn("Data", format="DD/MM/YYYY HH:mm"),
+            "valor_imovel": st.column_config.NumberColumn("Valor Imóvel", format="R$ %.2f"),
+            "parcela": st.column_config.NumberColumn("1ª Parcela", format="R$ %.2f"),
+            "status": st.column_config.TextColumn("Parecer"),
+        },
+        use_container_width=True,
+        hide_index=True,
+        height=400
+    )
 
-    # 3. Verifica se o DataFrame está vazio
-    if df_hist is None or df_hist.empty:
-        st.info("Nenhuma simulação encontrada. Que tal realizar a primeira agora?")
-        if st.button("🔄 Verificar novamente"):
-            st.rerun()
-    else:
-        # 4. Layout da Tabela
-        # Dica: O admin vê a coluna 'autor', o corretor talvez não precise
-        colunas_visiveis = ["data_criacao", "cliente", "valor_imovel", "parcela", "status"]
-        if autor_atual == 'admin':
-            colunas_visiveis.append("autor")
-
-        # Exibição profissional com st.dataframe
-        st.dataframe(
-            df_hist[colunas_visiveis], 
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "data_criacao": st.column_config.DatetimeColumn(
-                    "Data e Hora", 
-                    format="DD/MM/YYYY HH:mm"
-                ),
-                "cliente": "Nome do Cliente",
-                "valor_imovel": st.column_config.NumberColumn(
-                    "Valor Imóvel", 
-                    format="R$ %.2f"
-                ),
-                "parcela": st.column_config.NumberColumn(
-                    "1ª Parcela", 
-                    format="R$ %.2f"
-                ),
-                "status": st.column_config.TextColumn(
-                    "Status de Crédito"
-                ),
-                "autor": "Responsável"
-            }
+    # 5. Área de Gestão (Excluir)
+    with st.expander("🗑️ Gestão de Registos (Excluir)"):
+        st.warning("Cuidado: A exclusão é permanente.")
+        
+        c_del1, c_del2 = st.columns([3, 1])
+        
+        # IMPORTANTE: Adicionei step=1 e format="%d" para garantir que visualmente seja inteiro
+        id_para_excluir = c_del1.number_input(
+            "ID da Simulação para excluir", 
+            min_value=0, 
+            step=1,             # <--- FORÇA PULAR DE 1 EM 1
+            format="%d"         # <--- FORÇA VISUAL INTEIRO
         )
         
-        # 5. Ações Extras
-        st.markdown("---")
-        c1, c2 = st.columns([1, 1])
-        
-        with c1:
-            st.download_button(
-                label="📥 Baixar Histórico (CSV)",
-                data=df_hist.to_csv(index=False).encode('utf-8'),
-                file_name=f'historico_{autor_atual}.csv',
-                mime='text/csv',
-                width="stretch"
-            )
-        
-        with c2:
-            if st.button("🔄 Atualizar Lista", width="stretch"):
-                st.rerun()
+        if c_del2.button("Excluir Definitivamente", type="primary", use_container_width=True):
+            if id_para_excluir > 0:
+                sucesso = database.excluir_simulacao(id_para_excluir)
+                
+                if sucesso:
+                    st.success("✅ Apagado com sucesso!")
+                    
+                    # --- FAXINA COMPLETA ---
+                    st.cache_data.clear() # Limpa o cache de dados
+                    
+                    import time
+                    time.sleep(1) # Espera 1 segundinho pro banco respirar
+                    st.rerun()    # Recarrega a página do zero
+                else:
+                    st.error("❌ Não foi possível apagar via App. Verifique o console.")
