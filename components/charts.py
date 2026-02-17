@@ -1,101 +1,132 @@
 import plotly.graph_objects as go
+import plotly.express as px
 import pandas as pd
 
-# Configuração padrão para TODOS os gráficos (Tema Dark/Clean)
-LAYOUT_PADRAO = dict(
-    paper_bgcolor='rgba(0,0,0,0)',
-    plot_bgcolor='rgba(0,0,0,0)',
-    font=dict(family="Inter, sans-serif", color="#94a3b8"),
-    margin=dict(l=0, r=0, t=30, b=0),
-    xaxis=dict(showgrid=False, zeroline=False, color='#64748b'),
-    yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', zeroline=False, color='#64748b'),
-    hovermode="x unified"
-)
+# ==========================================
+# 🏠 GRÁFICOS DA SIMULAÇÃO (View Simulacao)
+# ==========================================
 
-def grafico_evolucao_parcelas(df):
+def plot_amortizacao(df):
+    """
+    Gera um gráfico de área empilhada mostrando a composição da parcela
+    (Amortização vs Juros) ao longo dos meses.
+    """
     fig = go.Figure()
-    
-    # Efeito degradê na linha
+
+    # Camada de Amortização (Verde)
     fig.add_trace(go.Scatter(
-        x=df['Mês'], 
-        y=df['Parcela'], 
-        mode='lines', 
-        name='Parcela',
-        line=dict(color='#3b82f6', width=4, shape='spline'), # Spline deixa a curva suave
-        fill='tozeroy', 
-        fillcolor='rgba(59, 130, 246, 0.1)'
+        x=df['Mes'],
+        y=df['Amortizacao'],
+        mode='lines',
+        name='Amortização (Abate Dívida)',
+        stackgroup='one',
+        line=dict(width=0, color='#10b981'), # Verde
+        fillcolor='rgba(16, 185, 129, 0.6)'
     ))
 
-    fig.update_layout(**LAYOUT_PADRAO, height=350)
-    fig.update_yaxes(tickprefix="R$ ")
-    return fig
+    # Camada de Juros (Vermelho)
+    fig.add_trace(go.Scatter(
+        x=df['Mes'],
+        y=df['Juros'],
+        mode='lines',
+        name='Juros (Custo)',
+        stackgroup='one',
+        line=dict(width=0, color='#ef4444'), # Vermelho
+        fillcolor='rgba(239, 68, 68, 0.6)'
+    ))
 
-def grafico_pizza_status(df):
-    df_status = df['status'].value_counts().reset_index()
-    
-    cores = {'APROVADO': '#10b981', 'ATENÇÃO': '#f59e0b', 'REPROVADO': '#ef4444'}
-    
-    fig = go.Figure(data=[go.Pie(
-        labels=df_status['status'], 
-        values=df_status['count'], 
-        hole=.7, # Buraco maior = mais moderno
-        marker=dict(colors=[cores.get(s, '#334155') for s in df_status['status']]),
-        textinfo='percent',
-        hoverinfo='label+value'
-    )])
-    
     fig.update_layout(
-        height=300, 
-        margin=dict(l=0, r=0, t=0, b=0),
-        showlegend=True,
-        paper_bgcolor='rgba(0,0,0,0)',
-        legend=dict(orientation="h", y=-0.1, font=dict(color='#94a3b8'))
+        title="Composição da Parcela ao Longo do Tempo",
+        xaxis_title="Meses",
+        yaxis_title="Valor (R$)",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        hovermode="x unified",
+        margin=dict(l=20, r=20, t=60, b=20),
+        height=400
     )
     return fig
 
+def plot_composicao(saldo_devedor, total_juros):
+    """
+    Gera um gráfico de Rosca (Donut) comparando o valor original vs juros.
+    """
+    labels = ['Valor Financiado', 'Total em Juros']
+    values = [saldo_devedor, total_juros]
+    colors = ['#3b82f6', '#f59e0b'] # Azul e Laranja
+
+    fig = go.Figure(data=[go.Pie(
+        labels=labels, 
+        values=values, 
+        hole=.5,
+        marker=dict(colors=colors)
+    )])
+
+    fig.update_layout(
+        title="Custo Total do Financiamento",
+        annotations=[dict(text='Total', x=0.5, y=0.5, font_size=20, showarrow=False)],
+        margin=dict(l=20, r=20, t=60, b=20),
+        height=300
+    )
+    return fig
+
+# ==========================================
+# 📊 GRÁFICOS DO DASHBOARD (View Dashboard)
+# ==========================================
+
 def grafico_timeline_simulacoes(df):
-    """Gera o gráfico de Barras da linha de tempo de atendimentos"""
-    
-    # 1. Agrupa por dia
-    if 'data_criacao' in df.columns:
-        df['data'] = pd.to_datetime(df['data_criacao']).dt.date
-    else:
-        # Fallback caso a coluna não exista (segurança)
+    """
+    Mostra a evolução das simulações ao longo do tempo.
+    """
+    if df.empty:
         return go.Figure()
 
-    df_timeline = df.groupby('data').size().reset_index(name='quantidade')
-    
-    # 2. Cria o Gráfico de Barras (Mais bonito para volumes diários)
-    fig = go.Figure()
-    
-    fig.add_trace(go.Bar(
-        x=df_timeline['data'], 
-        y=df_timeline['quantidade'],
-        name='Simulações',
-        marker_color='#3b82f6', # Azul da marca
-        opacity=0.9,
-        hovertemplate='<b>Dia %{x|%d/%m}</b><br>%{y} Simulações<extra></extra>',
-        showlegend=False
-    ))
-    
-    # 3. Configuração Visual (Remove grades e força formatação de data)
-    fig.update_layout(
-        height=300,
-        margin=dict(l=0, r=0, t=20, b=0),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        yaxis=dict(
-            showgrid=True, 
-            gridcolor='rgba(255,255,255,0.05)', # Grade bem sutil
-            color='#64748b',
-            zeroline=False,
-            dtick=1 # Garante que o eixo Y mostre apenas números inteiros (1, 2, 3...) e não 1.5
-        ),
-        xaxis=dict(
-            showgrid=False, 
-            color='#64748b',
-            tickformat="%d/%m", # <--- O SEGREDO: Força mostrar dia/mês
-            type='category' # Trata as datas como categorias para não criar buracos vazios
+    if 'data_criacao' in df.columns:
+        # Garante datetime
+        df['data_criacao'] = pd.to_datetime(df['data_criacao'])
+        
+        # Agrupa por dia
+        contagem = df.groupby(df['data_criacao'].dt.date).size().reset_index(name='Quantidade')
+        contagem.columns = ['Data', 'Quantidade']
+        
+        fig = px.bar(
+            contagem, 
+            x='Data', 
+            y='Quantidade', 
+            title="Evolução de Simulações por Dia",
+            color_discrete_sequence=['#3b82f6']
         )
+        
+        fig.update_layout(
+            xaxis_title="Data",
+            yaxis_title="Volume",
+            height=350,
+            margin=dict(l=20, r=20, t=40, b=20)
+        )
+        return fig
+    else:
+        return go.Figure()
+
+def grafico_pizza_status(df): # <--- NOME CORRIGIDO AQUI
+    """
+    Mostra a distribuição dos status (Pizza).
+    """
+    if df.empty or 'status' not in df.columns:
+        return go.Figure()
+        
+    contagem = df['status'].value_counts().reset_index()
+    contagem.columns = ['Status', 'Quantidade']
+    
+    fig = px.pie(
+        contagem, 
+        names='Status', 
+        values='Quantidade', 
+        title="Distribuição de Status",
+        hole=0.4,
+        color_discrete_sequence=px.colors.qualitative.Pastel
+    )
+    
+    fig.update_layout(
+        height=350,
+        margin=dict(l=20, r=20, t=40, b=20)
     )
     return fig

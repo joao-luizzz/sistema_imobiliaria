@@ -1,98 +1,60 @@
 import streamlit as st
-import os
-from core import calculos, database, relatorios
+import os # <--- Importante para verificar se o arquivo existe
+from views import login, dashboard, simulacao, oraculo, historico
+from core import database
+from services import auth_service
 
-# Configuração de Página (DEVE ser o primeiro comando Streamlit)
-st.set_page_config(page_title="Sistema Premium v3.5", page_icon="💎", layout="wide")
+# Configuração da Página
+st.set_page_config(
+    page_title="Sistema Imobiliário",
+    page_icon="🏡",
+    layout="wide"
+)
 
-# Importações modulares (Organizadas por pastas)
-from core import database, calculos
-from components import ui
-from views import simulacao, oraculo, historico, dashboard, gestao
+# Inicializa o Banco de Dados
+database.inicializar_banco()
 
-# --- 1. INICIALIZAÇÃO ---
-if 'autenticado' not in st.session_state:
-    st.session_state['autenticado'] = False
+# CSS Personalizado
+st.markdown("""
+    <style>
+        .stButton>button { height: 3em; }
+    </style>
+""", unsafe_allow_html=True)
 
-# --- 2. TELA DE LOGIN ---
-def tela_login():
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.markdown("<h2 style='text-align: center;'>🔐 Acesso Restrito</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='text-align: center; color: gray;'>Sistema Imobiliário Premium</p>", unsafe_allow_html=True)
-        
-        with st.form("login_form"):
-            user = st.text_input("Utilizador", placeholder="Seu usuário").strip()
-            pw = st.text_input("Senha", type="password", placeholder="Sua senha").strip()
-            
-            # Botão agora ocupa a largura total e é primário
-            botao = st.form_submit_button("Entrar", type="primary", use_container_width=True)
-            
-            if botao:
-                if not user or not pw:
-                    st.warning("Preencha todos os campos.")
-                else:
-                    # Feedback visual de carregamento
-                    with st.spinner("Autenticando..."):
-                        nome = database.login_usuario(user, pw)
-                        
-                    if nome:
-                        st.session_state['autenticado'] = True
-                        st.session_state['nome_usuario'] = nome
-                        st.session_state['username_logado'] = user
-                        st.toast(f"Bem-vindo, {nome}!", icon="👋")
-                        import time
-                        time.sleep(0.5) # Pequena pausa para ver o Toast
-                        st.rerun()
-                    else:
-                        st.error("Utilizador ou senha incorretos")
+# Lógica de Sessão
+if 'logado' not in st.session_state:
+    st.session_state['logado'] = False
 
-# --- 3. LÓGICA PRINCIPAL ---
-if not st.session_state['autenticado']:
-    tela_login()
+# Tela de Login ou Sistema
+if not st.session_state['logado']:
+    login.render()
+
 else:
-    # Injeta CSS e Inicializa Banco
-    ui.inject_custom_css()
-    database.init_db()
-    
-    is_admin = (st.session_state.get('username_logado') == 'admin')
-
-    # --- SIDEBAR GLOBAL ---
+    # --- SIDEBAR (MENU LATERAL) ---
     with st.sidebar:
-        st.title(f"Olá, {st.session_state['nome_usuario']} 👋")
-        
-        # O Modo de operação agora é uma variável global que passamos para as views
-        modo = st.radio("Navegação Rápida", ["🏠 Simulação", "🔮 Oráculo"])
-        st.markdown("---")
-        
-        if st.button("Sair", width="stretch"):
-            st.session_state['autenticado'] = False
-            st.rerun()
-
-    # --- DEFINIÇÃO DAS ABAS ---
-    titulos = ["🏠 Principal", "📂 Histórico", "📊 Analytics"]
-    if is_admin:
-        titulos.append("⚙️ Gestão")
-    
-    abas = st.tabs(titulos)
-
-    # --- RENDERIZAÇÃO DAS VIEWS (Onde a mágica acontece) ---
-    with abas[0]:
-        if modo == "🏠 Simulação":
-            simulacao.render()
+        # CORREÇÃO AQUI: Verifica se a imagem existe antes de tentar mostrar
+        if os.path.exists("assets/img/logo.png"):
+            st.image("assets/img/logo.png", width=150)
         else:
-            oraculo.render()
+            st.markdown("## 🏠 Imobiliária") # Mostra texto se não tiver logo
+            
+        st.markdown(f"👤 Olá, **{st.session_state['username_logado']}**")
+        
+        menu = st.radio(
+            "Navegação", 
+            ["Simulação", "Oráculo", "Dashboard", "Histórico"]
+        )
+        
+        st.markdown("---")
+        if st.button("Sair (Logout)"):
+            auth_service.realizar_logout()
 
-    with abas[1]:
-        historico.render()
-
-    with abas[2]:
+    # --- ROTEAMENTO DE PÁGINAS ---
+    if menu == "Simulação":
+        simulacao.render()
+    elif menu == "Oráculo":
+        oraculo.render()
+    elif menu == "Dashboard":
         dashboard.render()
-
-    if is_admin:
-        with abas[3]:
-            gestao.render()
-
-    # Rodapé fixo
-    st.markdown("""<div style="font-size: 0.7rem; color: #64748b; text-align: center; margin-top: 50px;">
-    Sistema Imobiliário Profissional • v3.5 (Modular) • 2026</div>""", unsafe_allow_html=True)
+    elif menu == "Histórico":
+        historico.render()

@@ -65,3 +65,25 @@ Deixar o uso mais fluido e evitar erros.
         O que é: Um texto gerado automaticamente: "Com base na renda de R$ 15k, este cliente tem perfil 'Ouro'. Sugira imóveis de até R$ 800k."
 
         Técnica: Regras condicionais avançadas (If/Else) ou conectar na API do Gemini para gerar o texto.
+
+
+        # 🗺️ Mapa de Evolução do Sistema
+
+## ✅ Feito
+- [x] Estrutura de Pastas (MVC)
+- [x] Calculadora de ITBI
+- [x] Geração de PDF Premium (HTML/CSS)
+- [x] Refatoração para Services (EM ANDAMENTO)
+
+## 🔜 Próximos Passos (Prioridade)
+
+### 1. 🏠 Calculadora "Aluguel vs. Compra" (Matador de Objeções)
+- Criar nova View (`views/comparativo.py`).
+- Inputs: Valor Aluguel, Rendimento CDI, Valorização Imóvel.
+- Gráfico de Linhas cruzadas (Patrimônio Aluguel vs. Compra).
+- Objetivo: Provar matematicamente que comprar é melhor a longo prazo.
+
+### 2. 🚦 CRM Leve (Funil de Vendas)
+- Alterar Banco de Dados: Adicionar coluna `status_lead`.
+- Dashboard: Criar gráfico de Funil.
+- Histórico: Permitir mudar status (Novo -> Visita -> Proposta -> Vendido).

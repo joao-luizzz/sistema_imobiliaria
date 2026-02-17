@@ -52,3 +52,11 @@ def renderizar_tabela_html(df):
             df_fmt[col] = df_fmt[col].apply(lambda x: f"R$ {x:,.2f}")
             
     return f'<div class="table-container">{df_fmt.to_html(classes="minimal-table", index=False, border=0)}</div>'
+
+def formatar_moeda(valor):
+    """
+    Recebe um float (ex: 4500.00) e retorna string formatada BR (R$ 4.500,00)
+    """
+    if valor is None:
+        return "R$ 0,00"
+    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
